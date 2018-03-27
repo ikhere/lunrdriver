@@ -1,0 +1,1 @@
+-e git+https://github.com/openstack/cinder.git@liberty-eol#egg=cinder

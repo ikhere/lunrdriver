@@ -14,12 +14,15 @@
 # limitations under the License.
 
 
-import unittest
-from urllib2 import URLError, HTTPError
-from StringIO import StringIO
 import json
+import unittest
+
+from StringIO import StringIO
+from urllib2 import URLError, HTTPError
 
 from lunrdriver.lunr import client
+
+lunr_api_endpoint = 'http://127.0.0.1:8080/v1.0'
 
 
 class MockResponse(object):
@@ -110,7 +113,8 @@ class TestLunrClient(unittest.TestCase):
         client.urlopen = self._orig_urlopen
 
     def test_get_volume(self):
-        c = client.LunrClient({'project_id': 'fake'})
+        c = client.LunrClient(lunr_api_endpoint, {'project_id': 'fake'})
+
         def volume_get(req):
             self.assertEquals(req.get_method(), 'GET')
             expected_path = 'http://127.0.0.1:8080/v1.0/fake/volumes/volid?'
@@ -123,7 +127,8 @@ class TestLunrClient(unittest.TestCase):
         self.assertEquals(resp.body['account_id'], 'fake')
 
     def test_get_volume_error(self):
-        c = client.LunrClient({'project_id': 'fake'})
+        c = client.LunrClient(lunr_api_endpoint, {'project_id': 'fake'})
+
         def url_error(req):
             raise stub_error(req, reason='connection refused')
         self.set_response(url_error)
@@ -131,6 +136,7 @@ class TestLunrClient(unittest.TestCase):
             c.volumes.get('volid')
             self.assertEquals(manager.exception.code, 0)
         self.assert_(url_error.called)
+
         def http_error(req):
             raise stub_error(req, 503)
         self.set_response(http_error)
@@ -140,7 +146,8 @@ class TestLunrClient(unittest.TestCase):
         self.assert_(http_error.called)
 
     def test_export_delete(self):
-        c = client.LunrClient({'project_id': 'fake'})
+        c = client.LunrClient(lunr_api_endpoint, {'project_id': 'fake'})
+
         def export_delete(req):
             self.assertEquals(req.get_method(), 'DELETE')
             expected_path = 'http://127.0.0.1:8080/v1.0/fake/volumes/' + \
@@ -152,7 +159,8 @@ class TestLunrClient(unittest.TestCase):
         self.assert_(export_delete.called)
 
     def test_export_delete_force(self):
-        c = client.LunrClient({'project_id': 'fake'})
+        c = client.LunrClient(lunr_api_endpoint, {'project_id': 'fake'})
+
         def export_delete_force(req):
             self.assertEquals(req.get_method(), 'DELETE')
             expected_path = 'http://127.0.0.1:8080/v1.0/fake/volumes/' + \
